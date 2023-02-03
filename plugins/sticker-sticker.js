@@ -5,19 +5,22 @@ import { webp2png } from '../lib/webp2mp4.js'
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   let stiker = false
+  let username = conn.getName(m.sender)
   try {
     let q = m.quoted ? m.quoted : m
     let mime = (q.msg || q).mimetype || q.mediaType || ''
     if (/webp|image|video/g.test(mime)) {
-      if (/video/g.test(mime)) if ((q.msg || q).seconds > 11) return m.reply('¡10 segundos como máximo!')
+      if (/video/g.test(mime)) if ((q.msg || q).seconds > 11) return m.reply('⚠️ *_Máximo 10 segundos._*')
       let img = await q.download?.()
-      if (!img) throw `responder imagen/video/pegatina con comando ${usedPrefix + command}`
+      if (!img) throw `[❕] RESPONDE A UN VIDEO, IMAGEN O INSERTE EL ENLACE DE UNA IMAGEN CON TERMINACIÓN  .jpg EL CUAL SERA CONVERTIDO  EN STICKER, DEBE RESPONDER O USAR EL COMANDO ${usedPrefix + command}*`
       let out
       try {
         stiker = await sticker(img, false, global.packname, global.author)
       } catch (e) {
         console.error(e)
       } finally {
+
+        await conn.sendNyanCat(m.chat, global.wait, imagen5, wm, null, md, m) 
         if (!stiker) {
           if (/webp/g.test(mime)) out = await webp2png(img)
           else if (/image/g.test(mime)) out = await uploadImage(img)
@@ -28,19 +31,20 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       }
     } else if (args[0]) {
       if (isUrl(args[0])) stiker = await sticker(false, args[0], global.packname, global.author)
-      else return m.reply('URL tidak valid!')
+      else return m.reply('URL invalido')
     }
   } catch (e) {
     console.error(e)
     if (!stiker) stiker = e
   } finally {
     if (stiker) conn.sendFile(m.chat, stiker, 'sticker.webp', '', m)
-    else throw 'La conversión falló'
+    else throw '*[❕] LO SIENTO, OCURRIO UN ERROR , VUELVA A INTENTARLO. NO OLVIDE RESPONDER A UN VIDEO, IMAGEN O INSERTE EL ENLACE DE UNA IMAGEN TERMINACIÓN  .jpg EL CUAL SERA CONVERTIDO EN STICKER.*'
+
   }
 }
-handler.help = ['stiker (caption|reply media)', 'stiker <url>', 'stikergif (caption|reply media)', 'stikergif <url>']
+handler.help = ['sticker']
 handler.tags = ['sticker']
-handler.command = /^s(tic?ker)?(gif)?(wm)?$/i
+handler.command = ['s', 'sticker', 'stiker'] 
 
 export default handler
 
